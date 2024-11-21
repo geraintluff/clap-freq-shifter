@@ -1,0 +1,35 @@
+@font-face {
+	font-family: 'Roboto Condensed';
+	src: url('fonts/roboto-condensed-v25-latin-regular.woff2') format('woff2');
+	font-weight: normal;
+	font-style: normal;
+	font-display: block;
+}
+
+@font-face {
+	font-family: 'Transport New';
+	src: url('fonts/transportnew-light-edit-webfont.woff2') format('woff2');
+	font-weight: 400;
+	font-style: normal;
+	font-display: block;
+}
+
+html {
+	--label-font: 1em "Transport New", Arial, sans-serif;
+	--display-font: 1em "Roboto Condensed", sans-serif;
+	font: var(--label-font);
+}
+
+/*--- focus and glow ---*/
+
+*:focus {
+	outline: 2px solid #F00;
+	outline-offset: 2px;
+}
+
+.interaction-drop {
+	outline: 0.35em dotted currentcolor;
+	outline-offset: -0.35em;
+	filter: brightness(0.9) blur(2vmin);
+	cursor: copy;
+}

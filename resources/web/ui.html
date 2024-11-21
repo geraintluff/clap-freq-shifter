@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Frequency Shifter</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<style>
+			@font-face {
+				font-family: 'Roboto Condensed';
+				src: url('roboto-condensed-v25-latin-regular.woff2') format('woff2');
+				font-weight: normal;
+				font-style: normal;
+				font-display: block;
+			}
+
+			body {
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 100vw;
+				height: 100vh;
+				margin: 0;
+				padding:0;
+				overflow: auto;
+				overscroll-behavior: none;
+
+				font-family: "Roboto Condensed", "Trebuchet MS", sans-serif;
+				letter-spacing: 0.05ex;
+				word-spacing: 0.1ex;
+				
+				display: grid;
+				grid-template-areas: ". ." "title title" "control readout" ". .";
+				grid-template-rows: 1fr, 4rem, minmax(1fr, 30rem), 1fr;
+
+				background: linear-gradient(90deg, #0003, #0000 40%, #0000 60%, #0003), url('images/hex-bumps.svg'), radial-gradient(ellipse at 40% 0%, #6404, transparent), radial-gradient(ellipse at 55% 100%, #0464, transparent), #222;
+				background-attachment: fixed;
+				color: #FFF;
+			}
+			h1 {
+				grid-area: title;
+				text-align: center;
+				font-weight: normal;
+			}
+			#freq-slider {
+				grid-area: control;
+				writing-mode: vertical-lr;
+				direction: rtl;
+			}
+			#freq-readout {
+				grid-area: readout;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+
+				margin: 1rem;
+				padding: 1rem;
+
+				background: linear-gradient(#0008, #111A 65%, #0008), var(--background, #FEC1);
+				color: var(--color, #FFF);
+				box-shadow: 0px 0.1rem 0.3rem 0.1rem #000D inset, 0px 0.06rem 0.1rem 0.05rem #000 inset;
+				border: 0.2rem solid #444;
+				border-radius: 0.6rem;
+			}
+			#freq-value {
+				text-align: right;
+				width: 5ex;
+				margin: 1ex;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>Frequency Shifter</h1>
+		<input type="range" id="freq-slider" min="-1000" max="1000" step="0.001">
+		<output id="freq-readout"><span id="freq-value">XYZ</span> Hz</output>
+		
+		<script src="cbor.js"></script>
+		<script>
+			let $ = document.querySelector.bind(document);
+			let slider = $('#freq-slider');
+			let number = $('#freq-value');
+			
+			function updateReadout() {
+				number.textContent = Math.round(parseFloat(slider.value));
+			}
+			updateReadout();
+
+			slider.oninput = e => {
+				let data = CBOR.encode({
+					freq: parseFloat(slider.value)
+				});
+				window.parent.postMessage(data);
+				updateReadout();
+			};
+			slider.ondblclick = e => {
+				slider.value = 0;
+				slider.oninput(e);
+			};
+		
+			addEventListener('message', e => {
+				let data = CBOR.decode(e.data);
+				console.log(data);
+				
+				if ('freq' in data) {
+					slider.value = data.freq;
+				}
+			});
+		</script>
+	</body>
+</html>

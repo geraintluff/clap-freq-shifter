@@ -1,0 +1,12 @@
+[submodule "modules/clap"]
+	path = modules/clap
+	url = https://github.com/geraintluff/clap.git
+[submodule "modules/cbor-walker"]
+	path = modules/cbor-walker
+	url = https://github.com/geraintluff/cbor-walker
+[submodule "modules/hilbert-iir"]
+	path = modules/hilbert-iir
+	url = https://github.com/Signalsmith-Audio/hilbert-iir.git
+[submodule "modules/clap-helpers"]
+	path = modules/clap-helpers
+	url = https://github.com/free-audio/clap-helpers.git
