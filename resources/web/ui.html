@@ -86,7 +86,7 @@
 
 			slider.oninput = e => {
 				let data = CBOR.encode({
-					freq: parseFloat(slider.value)
+					shiftHz: parseFloat(slider.value)
 				});
 				window.parent.postMessage(data);
 				updateReadout();
@@ -98,12 +98,13 @@
 		
 			addEventListener('message', e => {
 				let data = CBOR.decode(e.data);
-				console.log(data);
-				
-				if ('freq' in data) {
-					slider.value = data.freq;
+
+				if ('shiftHz' in data) {
+					slider.value = data.shiftHz;
+					updateReadout();
 				}
 			});
+			window.parent.postMessage(CBOR.encode("open"));
 		</script>
 	</body>
 </html>

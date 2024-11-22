@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.28)
 
 project(freq-shifter VERSION 1.0.0)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17) # for string_view
 set(OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/artefacts/${PROJECT_NAME}")
 
 # CLAP (headers as empty "library")

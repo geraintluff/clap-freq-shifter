@@ -3,6 +3,7 @@ wclap: emsdk
 	@$(EMSDK_ENV) emcmake cmake . -B build-emscripten
 	@$(EMSDK_ENV) cmake --build build-emscripten --target freq-shifter --config Release --verbose
 
+	rm -f build-emscripten/artefacts/freq-shifter/freq-shifter.wclap.tar.gz
 	cd build-emscripten/artefacts/freq-shifter/freq-shifter.wclap; tar --exclude=".*" -vczf ../freq-shifter.wclap.tar.gz *
 
 # ------
