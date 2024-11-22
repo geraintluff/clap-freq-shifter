@@ -9,6 +9,10 @@ set(OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/artefacts/${PROJECT_NAME}")
 add_library(clap INTERFACE)
 set_target_properties(clap PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR}/modules/clap/include)
 
+# CLAP helpers
+add_library(clap-helpers INTERFACE)
+set_target_properties(clap-helpers PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR}/modules/clap-helpers/include)
+
 # cbor-walker
 add_library(cbor-walker INTERFACE)
 set_target_properties(cbor-walker PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR}/modules/cbor-walker)
@@ -21,6 +25,7 @@ set_target_properties(hilbert-iir PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${CMA
 add_executable(${PROJECT_NAME})
 target_link_libraries(${PROJECT_NAME} PUBLIC
 	clap
+	clap-helpers
 	cbor-walker
 	hilbert-iir
 )
@@ -40,5 +45,5 @@ set(CMAKE_EXECUTABLE_SUFFIX ".wasm") # No accompanying JS
 file(GLOB PROJECT_RESOURCES "${CMAKE_CURRENT_SOURCE_DIR}/resources/*")
 list(FILTER PROJECT_RESOURCES EXCLUDE REGEX "^\\..+")
 # Copy them all into the .wclap/
-file(COPY ${PROJECT_RESOURCES} DESTINATION ${OUTPUT_DIR})
+file(COPY ${PROJECT_RESOURCES} DESTINATION ${OUTPUT_DIR}/${PROJECT_NAME}.wclap/)
 	
