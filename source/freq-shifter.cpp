@@ -115,7 +115,7 @@ public:
 		Cbor cbor(cborBuffer);
 		if (!cbor.isMap()) return false;
 		cbor.forEachPair([&](Cbor key, Cbor value){
-			if (key.utf8View() == "shiftHz" && value.isFloat()) {
+			if (key.utf8View() == "shiftHz" && value.isNumber()) {
 				shiftHz = value;
 			}
 		});
@@ -203,7 +203,7 @@ public:
 		}
 		if (!cbor.isMap()) return false;
 		cbor.forEachPair([&](Cbor key, Cbor value){
-			if (key.utf8View() == "shiftHz" && value.isFloat()) {
+			if (key.utf8View() == "shiftHz" && value.isNumber()) {
 				shiftHz = value;
 				_host.stateMarkDirty();
 				// Ideally we'd emit a parameter-change event for this on the next flush, but this is easier for now
