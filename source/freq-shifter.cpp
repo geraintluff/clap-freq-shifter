@@ -166,7 +166,7 @@ public:
 		for (uint32_t i = 0; i < blockLength; ++i) {
 			for (int c = 0; c < 2; ++c) {
 				float x = inputs[c][i];
-				auto cx = hilbert(x);
+				auto cx = hilbert(x, c);
 				cx *= std::polar(1.0f, shiftPhase*float(2*M_PI));
 				outputs[c][i] = cx.real();
 			}
