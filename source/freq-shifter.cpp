@@ -28,44 +28,44 @@ public:
 	};
 
 	// Parameter stuff
-	bool implementsParams() const override {
+	bool implementsParams() const noexcept override {
 		return true;
 	}
-	uint32_t paramsCount() const override {
+	uint32_t paramsCount() const noexcept override {
 		return 1;
 	}
-	bool paramsInfo(uint32_t index, clap_param_info *info) const override {
+	bool paramsInfo(uint32_t index, clap_param_info *info) const noexcept override {
 		if (index > 0) return false;
 		*info = shiftHzInfo;
 		return true;
       }
-      bool paramsValue(clap_id paramId, double *value) override {
+      bool paramsValue(clap_id paramId, double *value) noexcept override {
 		if (paramId == shiftHzInfo.id) {
 			*value = shiftHz;
 			return true;
 		}
 		return false;
       }
-      bool paramsValueToText(clap_id paramId, double value, char *display, uint32_t size) override {
+      bool paramsValueToText(clap_id paramId, double value, char *display, uint32_t size) noexcept override {
 		return false;
       }
-      bool paramsTextToValue(clap_id paramId, const char *display, double *value) override {
+      bool paramsTextToValue(clap_id paramId, const char *display, double *value) noexcept override {
 		return false;
       }
-      void paramsFlush(const clap_input_events *inEvents, const clap_output_events *out) override {
+      void paramsFlush(const clap_input_events *inEvents, const clap_output_events *out) noexcept override {
 		uint32_t numInputEvents = inEvents->size(inEvents);
 		for (uint32_t i = 0; i < numInputEvents; ++i) {
 			handleEvent(inEvents->get(inEvents, 0));
 		}
 	}
 	
-	bool implementsAudioPorts() const override {
+	bool implementsAudioPorts() const noexcept override {
 		return true;
 	}
-	uint32_t audioPortsCount(bool isInput) const override {
+	uint32_t audioPortsCount(bool isInput) const noexcept override {
 		return 1;
 	}
-	bool audioPortsInfo(uint32_t index, bool isInput, clap_audio_port_info *info) const override {
+	bool audioPortsInfo(uint32_t index, bool isInput, clap_audio_port_info *info) const noexcept override {
 		if (index > 0) return false;
 		*info = {
 			.id=(isInput ? 0xEA97800D : 0x5A88FC32),
@@ -78,10 +78,10 @@ public:
 		return true;
       }
       
-      bool implementsState() const override {
+      bool implementsState() const noexcept override {
 		return true;
 	}
-      bool stateSave(const clap_ostream *stream) override {
+      bool stateSave(const clap_ostream *stream) noexcept override {
 		auto cbor = getCbor();
 		cbor.openMap();
 		cbor.addUtf8("shiftHz");
@@ -98,7 +98,7 @@ public:
 		cborBuffer.resize(0);
 		return true;
 	}
-      bool stateLoad(const clap_istream *stream) override {
+      bool stateLoad(const clap_istream *stream) noexcept override {
 		// Re-use the same buffer, but this time we're reading from it
 		cborBuffer.resize(0);
 		while (cborBuffer.size() < cborBuffer.capacity() - 1024) {
@@ -141,18 +141,18 @@ public:
 		}
 	}
 	
-	bool activate(double sRate, uint32_t, uint32_t) override {
+	bool activate(double sRate, uint32_t, uint32_t) noexcept override {
 		sampleRate = float(sRate);
 		hilbert = {sampleRate, 2};
 		return true;
       }
       
-      void reset() override {
+      void reset() noexcept override {
 		hilbert.reset();
 		shiftPhase = 0;
 	}
 	
-	clap_process_status process(const clap_process *process) override {
+	clap_process_status process(const clap_process *process) noexcept override {
 		// a hack ideally we use the position within the block
 		paramsFlush(process->in_events, process->out_events);
 
@@ -227,11 +227,11 @@ public:
 		.receive=web_receive
 	};
 	
-	bool init() override {
+	bool init() noexcept override {
 		_host.getExtension(hostWeb, CLAP_EXT_WEB);
 		return true;
 	}
-      const void *extension(const char *id) override {
+      const void *extension(const char *id) noexcept override {
 		if (!strcmp(id, CLAP_EXT_WEB)) return &extWeb;
 		return nullptr;
 	}

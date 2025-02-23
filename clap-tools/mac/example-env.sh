@@ -1,0 +1,6 @@
+APPLE_TEAM_ID="ABCDEF1234"
+APPLE_LOGIN_ID="email@example.com"
+APPLE_APP_PASSWORD="abcd-efgh-hijk-lmno"
+APPLE_CODESIGN_APPLICATION="Developer ID Application: My Company"
+APPLE_CODESIGN_INSTALLER="Developer ID Installer: My Company"
+PLUGIN_INSTALL_SUBDIR="/My-Company"

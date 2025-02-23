@@ -1,13 +1,24 @@
+all: clap vst3 wclap
+
+CMAKE_PARAMS := -DCMAKE_BUILD_TYPE=Release -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=.. -DCMAKE_LIBRARY_OUTPUT_DIRECTORY=..
+
+clap:
+	cmake -B out/build $(CMAKE_PARAMS)
+	cmake --build out/build --target freq-shifter.clap --config Release
+
+vst3:
+	cmake -B out/build $(CMAKE_PARAMS)
+	cmake --build out/build --target freq-shifter.vst3 --config Release
+
 wclap: emsdk
 	@# based on https://stunlock.gg/posts/emscripten_with_cmake/
-	@$(EMSDK_ENV) emcmake cmake . -B build-emscripten
-	@$(EMSDK_ENV) cmake --build build-emscripten --target freq-shifter --config Release --verbose
+	@$(EMSDK_ENV) emcmake cmake . -B out/build-emscripten $(CMAKE_PARAMS)
+	@$(EMSDK_ENV) cmake --build out/build-emscripten --target freq-shifter.wclap --config Release
 
-	rm -f build-emscripten/artefacts/freq-shifter/freq-shifter.wclap.tar.gz
-	cd build-emscripten/artefacts/freq-shifter/freq-shifter.wclap; tar --exclude=".*" -vczf ../freq-shifter.wclap.tar.gz *
+clean:
+	rm -rf out
 
-# ------
-# Emscripten SDK setup
+#----- Emscripten SDK setup -----#
 
 CURRENT_DIR := $(shell pwd)
 EMSDK ?= $(CURRENT_DIR)/emsdk
