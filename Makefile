@@ -2,12 +2,13 @@ all: clap vst3 wclap
 
 CMAKE_PARAMS := -DCMAKE_BUILD_TYPE=Release -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=.. -DCMAKE_LIBRARY_OUTPUT_DIRECTORY=..
 
-clap:
+out/build: Makefile
 	cmake -B out/build $(CMAKE_PARAMS)
+
+clap: out/build
 	cmake --build out/build --target freq-shifter.clap --config Release
 
-vst3:
-	cmake -B out/build $(CMAKE_PARAMS)
+vst3: out/build
 	cmake --build out/build --target freq-shifter.vst3 --config Release
 
 wclap: emsdk

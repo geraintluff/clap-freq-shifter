@@ -34,20 +34,17 @@ if (NOT DEFINED WCLAP)
 	FetchContent_MakeAvailable(clap-wrapper)
 endif()
 
+set(CLAP_TOOLS_CMAKE_DIR "${CMAKE_CURRENT_LIST_DIR}" PARENT_SCOPE)
+
 #### Wraps a CLAP-based static library into various plugin formats
 
 function (clap_targets_from_static NAME BUNDLE_ID RESOURCES_DIR)
 	if(NOT DEFINED CMAKE_RUNTIME_OUTPUT_DIRECTORY)
-		set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+		set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/plugins")
 	endif()
-#		set(STFX_OUTPUT_DIR "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/plugin-$<CONFIG>/${NAME}")
-#	elseif(CMAKE_LIBRARY_OUTPUT_DIRECTORY)
-#		set(STFX_OUTPUT_DIR "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/plugin-$<CONFIG>/${NAME}")
-#	else()
-#		set(STFX_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/plugin-$<CONFIG>/${NAME}")
-#	endif()
-#	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${STFX_OUTPUT_DIR})
-#	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${STFX_OUTPUT_DIR})
+	if(NOT DEFINED CMAKE_LIBRARY_OUTPUT_DIRECTORY)
+		set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/plugins")
+	endif()
 
 	if (APPLE)
 		target_link_libraries(${NAME} PRIVATE "-framework Cocoa")
@@ -99,19 +96,21 @@ function (clap_targets_from_static NAME BUNDLE_ID RESOURCES_DIR)
 				BUNDLE True
 				BUNDLE_EXTENSION clap
 				XCODE_ATTRIBUTE_GENERATE_PKGINFO_FILE YES
+				MACOSX_BUNDLE True
 				MACOSX_BUNDLE_GUI_IDENTIFIER "${BUNDLE_ID}.clap"
 				MACOSX_BUNDLE_BUNDLE_NAME ${NAME}
 				MACOSX_BUNDLE_BUNDLE_VERSION "${CMAKE_PROJECT_VERSION}"
 				MACOSX_BUNDLE_SHORT_VERSION_STRING "${CMAKE_PROJECT_VERSION}"
-#				MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_LIST_DIR}/CLAP_Info.plist.in
+				MACOSX_BUNDLE_INFO_PLIST ${CLAP_TOOLS_CMAKE_DIR}/extra/CLAP_Info.plist.in
 			)
+			macos_bundle_flag(TARGET ${NAME}.clap)
 
 			if (NOT "${RESOURCES_DIR}" STREQUAL "")
 				add_custom_command(
 					TARGET ${NAME}.clap POST_BUILD
 					COMMAND ${CMAKE_COMMAND} -E copy_directory
 					"${RESOURCES_DIR}"
-					"$<TARGET_FILE_DIR:${NAME}.clap>/../Contents/Resources/"
+					"$<TARGET_FILE_DIR:${NAME}.clap>/../Resources/"
 				)
 			endif()
 
@@ -136,7 +135,7 @@ function (clap_targets_from_static NAME BUNDLE_ID RESOURCES_DIR)
 				MACOSX_BUNDLE_BUNDLE_NAME ${NAME}
 				MACOSX_BUNDLE_BUNDLE_VERSION "${CMAKE_PROJECT_VERSION}"
 				MACOSX_BUNDLE_SHORT_VERSION_STRING "${CMAKE_PROJECT_VERSION}"
-#				MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_LIST_DIR}/VST3_Info.plist.in
+				MACOSX_BUNDLE_INFO_PLIST ${CLAP_TOOLS_CMAKE_DIR}/extra/VST3_Info.plist.in
 			)
 
 			if (NOT "${RESOURCES_DIR}" STREQUAL "")
@@ -144,7 +143,7 @@ function (clap_targets_from_static NAME BUNDLE_ID RESOURCES_DIR)
 					TARGET ${NAME}.vst3 POST_BUILD
 					COMMAND ${CMAKE_COMMAND} -E copy_directory
 					"${RESOURCES_DIR}"
-					"$<TARGET_FILE_DIR:${NAME}.vst3>/../Contents/Resources/"
+					"$<TARGET_FILE_DIR:${NAME}.vst3>/../Resources/"
 				)
 			endif()
 		else()
