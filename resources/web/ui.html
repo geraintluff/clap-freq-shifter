@@ -12,6 +12,10 @@
 				font-style: normal;
 				font-display: block;
 			}
+			
+			:root {
+				font-size: calc(min(14px, 3vmin));
+			}
 
 			body {
 				position: fixed;
@@ -28,30 +32,24 @@
 				letter-spacing: 0.05ex;
 				word-spacing: 0.1ex;
 				
-				display: grid;
-				grid-template-areas: ". ." "title title" "control readout" ". .";
-				grid-template-rows: 1fr, 4rem, minmax(1fr, 30rem), 1fr;
-
+				display: flex;
+				flex-direction: column;
+				justify-content: space-evenly;
+				align-items: stretch;
+				
 				background: linear-gradient(90deg, #0003, #0000 40%, #0000 60%, #0003), url('images/hex-bumps.svg'), radial-gradient(ellipse at 40% 0%, #6404, transparent), radial-gradient(ellipse at 55% 100%, #0464, transparent), #222;
 				background-attachment: fixed;
 				color: #FFF;
 			}
 			h1 {
-				grid-area: title;
 				text-align: center;
 				font-weight: normal;
 			}
-			#freq-slider {
-				grid-area: control;
-				writing-mode: vertical-lr;
-				direction: rtl;
-			}
-			#freq-readout {
-				grid-area: readout;
-				display: flex;
-				justify-content: center;
-				align-items: center;
-
+			.panel {
+				text-align: center;
+			
+				border: none;
+				font-size: 1.5rem;
 				margin: 1rem;
 				padding: 1rem;
 
@@ -61,47 +59,116 @@
 				border: 0.2rem solid #444;
 				border-radius: 0.6rem;
 			}
+			.param-slider {
+				writing-mode: vertical-lr;
+				direction: rtl;
+				width: 20%;
+				text-align: right;
+			}
 			#freq-value {
 				text-align: right;
-				width: 5ex;
+				width: 40%;
 				margin: 1ex;
 			}
 		</style>
 	</head>
 	<body>
 		<h1>Frequency Shifter</h1>
-		<input type="range" id="freq-slider" min="-1000" max="1000" step="0.001">
-		<output id="freq-readout"><span id="freq-value">XYZ</span> Hz</output>
+		<table class="panel">
+			<thead>
+				<tr>
+					<th>Shift</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>
+						<input type="range" data-param="shiftHz" class="param-slider" value="0" min="-1000" max="1000" step="0.001">
+					</td>
+				</tr>
+				<tr>
+					<td data-param="shiftHz">
+						<span class="param-value">XYZ</span> <span class="param-unit">Hz</span>
+					</td>
+				</tr>
+			</tbody>
+		</table>
 		
 		<script src="cbor.js"></script>
 		<script>
-			let $ = document.querySelector.bind(document);
-			let slider = $('#freq-slider');
-			let number = $('#freq-value');
-			
-			function updateReadout() {
-				number.textContent = Math.round(parseFloat(slider.value));
-			}
-			updateReadout();
+			let $ = document.querySelector.bind(document), $$ = document.querySelectorAll.bind(document);
+			let params = {};
+			function getParam(paramKey) {
+				if (!(paramKey in params)) {
+					params[paramKey]
+				}
+				let param = params[paramKey] = params[paramKey] || {
+					key: paramKey,
+					defaultValue: 0,
 
-			slider.oninput = e => {
-				let data = CBOR.encode({
-					shiftHz: parseFloat(slider.value)
-				});
-				window.parent.postMessage(data, '*');
-				updateReadout();
-			};
-			slider.ondblclick = e => {
-				slider.value = 0;
-				slider.oninput(e);
-			};
-		
+					sendValue() {
+						let data = CBOR.encode({
+							[paramKey]: parseFloat(param.slider.value)
+						});
+						window.parent.postMessage(data, '*');
+						param.update();
+					},
+					setValue(v) {
+						param.slider.value = v;
+						param.update();
+					},
+					update() {
+						if (!param.number) return;
+						param.number.textContent = Math.round(parseFloat(param.slider.value));
+					},
+					reset() {
+						param.slider.value = param.defaultValue;
+						param.sendValue();
+					}
+				};
+				return param;
+			}
+			function getParamKey(node) {
+				while (node && !node?.dataset?.param) {
+					node = node.parentNode;
+				}
+				return node?.dataset?.param;
+			}
+
+			$$('.param-slider').forEach(slider => {
+				let paramKey = getParamKey(slider);
+				let param = getParam(paramKey);
+				
+				param.slider = slider;
+				slider.oninput = param.sendValue;
+				slider.ondblclick = param.reset;
+
+				param.defaultValue = parseFloat(param.slider.value);
+				param.update();
+			});
+
+			$$('.param-value').forEach(node => {
+				let paramKey = getParamKey(node);
+				let param = getParam(paramKey);
+				
+				param.number = node;
+				param.update();
+			});
+
 			addEventListener('message', e => {
 				let data = CBOR.decode(e.data);
-
-				if ('shiftHz' in data) {
-					slider.value = data.shiftHz;
-					updateReadout();
+				if (data && typeof data === 'object') {
+					for (let key in data) {
+						if (params[key]) {
+							let v = data[key];
+							if (typeof v != 'number') {
+								console.error("expected number: ", key, v);
+							}
+							params[key].setValue(v);
+						}
+					}
+				} else {
+					console.log(data);
 				}
 			});
 			window.parent.postMessage(CBOR.encode("open"), '*');
